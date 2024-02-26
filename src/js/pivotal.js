@@ -30,7 +30,9 @@ var setHeaders = (cookie) => {
 
 var extractProjectId = () => {
     var urlElements = window.location.href.split("/");
-    return urlElements[urlElements.length - 1];
+    var projectsSegment = urlElements.findIndex((e) => e === "projects");
+    var id = urlElements[projectsSegment+1];
+    return id;
 }
 
 var fetchStartedStories = async (forceRefresh) => {
@@ -58,4 +60,12 @@ var fetchStoryHistory = async (id, forceRefresh) => {
         storyHistories[id] = await response.json();
     }
     return storyHistories[id];
+}
+
+var fetchAllStories = async (forceRefresh) => {
+    // TODO caching
+    const myRequest = new Request(`${BASE_URL}/projects/${extractProjectId()}/stories`);
+        var response = await fetch(myRequest, requestInit);
+        var allStories = await response.json();
+        return allStories;
 }

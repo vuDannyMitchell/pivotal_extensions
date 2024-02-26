@@ -1,4 +1,3 @@
-const PATTERN = "www.pivotaltracker.com";
 const SAVE_AND_COLLAPSE = "Save and collapse";
 const SAVE_AMP_COLLAPSE = "Save &amp; collapse";
 const SAVE_AMP2_COLLAPSE = "Save & collapse";
@@ -60,24 +59,6 @@ var handleMessage = (request, sender, sendResponse) => {
     }
 }
 
-// https://stackoverflow.com/questions/5525071/how-to-wait-until-an-element-exists
-var waitForElm = (selector) => {
-    return new Promise(resolve => {
-        if (document.querySelector(selector)) {
-            return resolve(document.querySelector(selector));
-        }
-        const observer = new MutationObserver(mutations => {
-            if (document.querySelector(selector)) {
-                observer.disconnect();
-                resolve(document.querySelector(selector));
-            }
-        });
-        observer.observe(document.documentElement, {
-            childList: true,
-            subtree: true
-        });
-    });
-}
 
 chrome.runtime.onMessage.addListener(handleMessage);
 readPrefsFromStorageAndUpdate(false);
@@ -89,6 +70,6 @@ document.addEventListener("click", (e) => {
     }
 });
 
-waitForElm(`#panel_backlog_${extractProjectId()}`).then((elm) => {
+waitForElement(`#panel_backlog_${extractProjectId()}`).then((elm) => {
     readPrefsFromStorageAndUpdate(false);
 });
