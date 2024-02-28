@@ -62,10 +62,12 @@ var fetchStoryHistory = async (id, forceRefresh) => {
     return storyHistories[id];
 }
 
+/*
 var fetchAllStories = async (forceRefresh) => {
     // TODO caching
     const myRequest = new Request(`${BASE_URL}/projects/${extractProjectId()}/stories`);
-        var response = await fetch(myRequest, requestInit);
-        var allStories = await response.json();
-        return allStories;
+    var response = await fetch(myRequest, requestInit);
+    var allStories = await response.json();
+    return allStories;
 }
+*/
