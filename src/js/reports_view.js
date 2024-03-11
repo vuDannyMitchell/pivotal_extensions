@@ -62,9 +62,9 @@ var handleMessage = (request, sender, sendResponse) => {
 
 
 chrome.runtime.onMessage.addListener(handleMessage);
-cycletimetest();
 
-waitForElement(`#cycle-time-chart`).then((elm) => {
+waitForElement(`.cycle-time-chart`).then((elm) => {
     console.log("waited");
+    cycletimetest();
 });
 
