@@ -1,24 +1,29 @@
+const CYCLE_TIME_CHART = "cycle_time_chart"
+const CYCLE_TIME_ITERATIONS = "cycle_time_iterations"
+
 console.log("cycle_time_main");
 
 var readPrefsFromStorageAndUpdate = (forceRefresh) => {
-    /*
-    chrome.storage.local.get(["add_days_in_progress","iteration_progress"]).then((result) => {
-        var add_days_in_progress = result.add_days_in_progress;
-        if(!add_days_in_progress) add_days_in_progress = "true";
+    
+    chrome.storage.local.get([CYCLE_TIME_CHART,CYCLE_TIME_ITERATIONS]).then((result) => {
+        var cycle_time_chart = result[CYCLE_TIME_CHART];
+        if(!cycle_time_chart) cycle_time_chart = "true";
 
-        var iteration_progress = result.iteration_progress;
-        if(!iteration_progress) iteration_progress = "true";
+        var cycle_time_iterations = parseInt(result[CYCLE_TIME_ITERATIONS]);
+        if(!cycle_time_iterations) cycle_time_iterations = 4;
 
         var preferences = {
-            add_days_in_progress : add_days_in_progress, 
-            iteration_progress : iteration_progress
+            [CYCLE_TIME_CHART] : cycle_time_chart, 
+            [CYCLE_TIME_ITERATIONS] : cycle_time_iterations
         };
         updatePage(preferences, forceRefresh);
       });
-      */
+      
 }
 
 var updatePage = (preferences, forceRefresh) => {
+    console.log("Updatepage");
+    console.log(preferences);
     /*
     if(preferences.add_days_in_progress === "true") {
         addDaysInProgress(forceRefresh);
@@ -65,6 +70,6 @@ chrome.runtime.onMessage.addListener(handleMessage);
 
 waitForElement(`.cycle-time-chart`).then((elm) => {
     console.log("waited");
-    cycletimetest();
+    readPrefsFromStorageAndUpdate(false);
 });
 

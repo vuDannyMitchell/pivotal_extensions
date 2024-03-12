@@ -1,5 +1,12 @@
 const MS_IN_HR = 3600000;
 
+var insertBox = () => {
+    var containerElement = document.createElement("div");
+    containerElement.setAttribute("class", "pe_test");
+    var chartElement = document.querySelector(`.cycle-time-chart`);
+    chartElement.parentNode.parentNode.parentNode.appendChild(containerElement);
+
+}
 
 var hoursBetweenDates = (earlier, later) => {
     var earlierDate = new Date(earlier);
@@ -101,7 +108,7 @@ var cycletimetest = async () => {
 
     //var stories = fetchAllStories();
     //console.log(stories);
-    var ITERATIONS_TO_FETCH = 1;
+    var ITERATIONS_TO_FETCH = 1; // TODO make an option
     const myRequest = new Request(`${BASE_URL}/projects/${extractProjectId()}/iterations?scope=done&offset=-${ITERATIONS_TO_FETCH}`);
     var response = await fetch(myRequest, requestInit);
     var iterations = await response.json();
