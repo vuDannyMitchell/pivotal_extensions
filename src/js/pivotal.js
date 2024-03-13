@@ -54,12 +54,20 @@ var fetchCurrentIteration = async (forceRefresh) => {
 }
 
 var fetchStoryHistory = async (id, forceRefresh) => {
+    //console.log(`fetching history for ${id}, forced ${forceRefresh}`);
     if(storyHistories[id] === undefined || forceRefresh) {
         const myRequest = new Request(`${BASE_URL}/projects/${extractProjectId()}/stories/${id}/activity`);
         var response = await fetch(myRequest, requestInit);
         storyHistories[id] = await response.json();
     }
     return storyHistories[id];
+}
+
+var fetchPrecedingIterations = async (iterations_to_fetch) => {
+    const myRequest = new Request(`${BASE_URL}/projects/${extractProjectId()}/iterations?scope=done&offset=-${iterations_to_fetch}`);
+    var response = await fetch(myRequest, requestInit);
+    var iterations = await response.json();
+    return iterations;
 }
 
 /*

@@ -1,4 +1,5 @@
-const MS_IN_HR = 3600000;
+const TRACKABLE_STATES = ["started", "finished", "delivered", "accepted"];
+
 
 var insertBox = () => {
     var containerElement = document.createElement("div");
@@ -8,7 +9,10 @@ var insertBox = () => {
 
 }
 
+// Counts 24 hours a day, minus weekends
 var hoursBetweenDates = (earlier, later) => {
+    const MS_IN_HR = 3600000;
+
     var earlierDate = new Date(earlier);
     var laterDate = new Date(later);
     var diff = laterDate - earlierDate;
@@ -22,10 +26,6 @@ var hoursBetweenDates = (earlier, later) => {
         }
         counter = counter - (24*MS_IN_HR);
     }
-
-    //console.log(`weekend day count: ${weekendDayCount}`);
-    //console.log(`diff hours ${Math.ceil(diff/MS_IN_HR)}`)
-    //console.log(`diff minus weekends ${Math.ceil((diff - (weekendDayCount*24*MS_IN_HR))/MS_IN_HR)}`)
     return Math.ceil((diff - (weekendDayCount*24*MS_IN_HR))/MS_IN_HR);
 }
 
@@ -36,11 +36,42 @@ var createContainerHTML = () => {
     return containerElement;
 }
 
-var createTableHTML = (averageTimes) => {
+var createTableHTML = (averageTimes, iterationsToAverage) => {
+    //console.log("creating table");
+    //console.log(iterationsToAverage)
     var containerElement = document.createElement("div");
-    for(let estimate in averageTimes) {
-        containerElement.insertAdjacentHTML( 'beforeend', `<p>Average for ${estimate} point stories is ${averageTimes[estimate]}</p>` );
+    var headerElement = document.createElement("h2");
+    headerElement.innerHTML = `Average Time Spent over ${iterationsToAverage} iteration(s)`;
+    containerElement.appendChild(headerElement);
+    var tableElement = document.createElement("table");
+    var tableRowElement = document.createElement("tr");
+    var columnElement = document.createElement("th");
+    columnElement.innerHTML = `Estimate`;
+    tableRowElement.appendChild(columnElement);
+    
+    for(state in TRACKABLE_STATES) {
+        columnElement = document.createElement("th");
+        columnElement.innerHTML = `${TRACKABLE_STATES[state]}`;
+        tableRowElement.appendChild(columnElement);
     }
+    tableElement.appendChild(tableRowElement);
+
+    for(let estimate in averageTimes) {
+        tableRowElement = document.createElement("tr");
+        columnElement = document.createElement("td");
+        columnElement.innerHTML = `${estimate} (${averageTimes[estimate].count})`;
+        tableRowElement.appendChild(columnElement);
+        for(state in averageTimes[estimate]) {
+            columnElement = document.createElement("td");
+            columnElement.innerHTML = `${averageTimes[estimate][state]}`;
+            tableRowElement.appendChild(columnElement);
+        }
+        tableElement.appendChild(tableRowElement);
+    }
+
+
+    containerElement.appendChild(tableElement);
+
     return containerElement;
 }
 
@@ -69,94 +100,80 @@ var createLoadingGifHTML = () => {
 }
 
 
-// TODO   #187019876 is off
-//        #186984278
-// just track time in each state and return object for printing detailed data
-var determineTimeSpent = (history) => {
-    var total = 0;
-    var started;
-    var hours;
-    //console.log(history);
-    for(let i = history.length - 1; i >= 0; i--) {
-        //console.log(`${i} ${history[i].highlight}`);
-        if(history[i].highlight === "accepted" && started !== undefined) {
-            let accepted = history[i].occurred_at;
-            //console.log(`${i} ${history[i].highlight} ${accepted}`);
-            hours = hoursBetweenDates(started, accepted);
-            total += hours;
-        } else if(history[i].highlight === "unstarted") {
-            let unstarted = history[i].occurred_at;
-            //console.log(`${i} ${history[i].highlight} ${unstarted}`);
-            hours = hoursBetweenDates(started, unstarted);
-            total += hours;
-        } else if(history[i].highlight === "started") {
-            started = history[i].occurred_at;
-            //console.log(`${i} started ${started}`);
-        } 
+var determineTimeSpentInEachState = (history) => {
+    var timeSpent = {};
+    var trackedState = {};
+    for(state in TRACKABLE_STATES) {
+        timeSpent[TRACKABLE_STATES[state]] = 0;
     }
-    return total;
+    for(let i = history.length - 1; i >= 0; i--) {        
+        if(TRACKABLE_STATES.includes(history[i].highlight)) {
+            if(trackedState.highlight === undefined) {
+                trackedState.highlight = history[i].highlight;
+                trackedState.occurred_at = history[i].occurred_at;
+            } else {
+                var hoursBetween = hoursBetweenDates(trackedState.occurred_at, history[i].occurred_at);
+                timeSpent[trackedState.highlight] += hoursBetween;
+                trackedState.highlight = history[i].highlight;
+                trackedState.occurred_at = history[i].occurred_at;
+            }
+        }
+    }
+    return timeSpent;
 }
 
-var cycletimetest = async () => {
-    console.log("cycletimetest");
+var cycletimetest = async (displayChart, iterationsToAverage) => {
 
     removeCTBPHTML();
-    var chartElement = document.querySelector(`.cycle-time-chart`);
-    var newElement = createContainerHTML();
-    newElement.appendChild(createLoadingGifHTML());
-    chartElement.parentNode.appendChild(newElement);
+    if(displayChart === "true") {
+        var chartElement = document.querySelector(`.cycle-time-chart`);
+        var newElement = createContainerHTML();
+        newElement.appendChild(createLoadingGifHTML());
+        chartElement.parentNode.appendChild(newElement);
 
-    //var stories = fetchAllStories();
-    //console.log(stories);
-    var ITERATIONS_TO_FETCH = 1; // TODO make an option
-    const myRequest = new Request(`${BASE_URL}/projects/${extractProjectId()}/iterations?scope=done&offset=-${ITERATIONS_TO_FETCH}`);
-    var response = await fetch(myRequest, requestInit);
-    var iterations = await response.json();
-    var storyPointCount = {};
-    var storyPointTime = {};
-    for(let i = 0; i < iterations.length; i++) {
-    //for(let i = 0; i < 1; i++) {
-        //console.log(iterations[i])
-        console.log(`Processing iteration ${iterations[i].number}`);
-        for(let s = 0; s < iterations[i].stories.length; s++) {
-        //for(let s = 0; s < 1; s++) {
-            let story = iterations[i].stories[s];
-            if(story.story_type === "feature") {
-            //if(story.story_type === "feature" && story.estimate === 3 && s===4) {
-                let history = await fetchStoryHistory(story.id, false);
-                //console.log(story)
-                //console.log(history)
-                var time_spent = determineTimeSpent(history);
-                //console.log(`${story.name} time_spent ${time_spent}`)
+        var iterations = await fetchPrecedingIterations(iterationsToAverage);
+        //console.log(iterations);
+        var storyStateData = {};
+        for(let i = 0; i < iterations.length; i++) {
+            console.log(`Processing iteration ${iterations[i].number}`);
+            for(let s = 0; s < iterations[i].stories.length; s++) {
+                let story = iterations[i].stories[s];
+                if(story.story_type === "feature") {
+                    let history = await fetchStoryHistory(story.id, false);
 
-                if(storyPointCount[story.estimate] === undefined) {
-                    storyPointCount[story.estimate] = 0;
-                }
-                if(storyPointTime[story.estimate] === undefined) {
-                    storyPointTime[story.estimate] = 0;
-                }
-
-                storyPointCount[story.estimate]++;
-                storyPointTime[story.estimate] += time_spent;
+                    var timeSpent = determineTimeSpentInEachState(history);
+                    
+                    if(storyStateData[story.estimate] === undefined) {
+                        storyStateData[story.estimate] = { count : 0, timeSpent : {}}
+                        for(state in TRACKABLE_STATES) {
+                            storyStateData[story.estimate].timeSpent[TRACKABLE_STATES[state]] = 0;
+                        }
+                    } else {
+                        storyStateData[story.estimate].count++;
+                        for(state in TRACKABLE_STATES) {
+                            storyStateData[story.estimate].timeSpent[TRACKABLE_STATES[state]] += timeSpent[TRACKABLE_STATES[state]];
+                        }
+                    }
+                }   
             }
-            
         }
-        //console.log(storyPointCount);
-        //console.log(storyPointTime);
-    }
-    console.log(storyPointCount);
-    console.log(storyPointTime);
+        
+        var averageTimes = {}
+        for(estimate in storyStateData) {
+            averageTimes[estimate] = {
+                count : storyStateData[estimate].count
+            };
+            for(state in TRACKABLE_STATES) {
+                averageTimes[estimate][TRACKABLE_STATES[state]] = Math.round(storyStateData[estimate].timeSpent[TRACKABLE_STATES[state]] / storyStateData[estimate].count);
+            }
+        }
+        //console.log(averageTimes)
 
-    let averageTimes = {};
-    for(let estimate in storyPointCount) {
-        averageTimes[estimate] = storyPointTime[estimate]/storyPointCount[estimate];
-        console.log(`Average for ${estimate} story is ${averageTimes[estimate]} hours`);
+        removeLoadingGif();
+        
+        newElement.appendChild(createTableHTML(averageTimes, iterationsToAverage));
     }
-    //console.log(averageTimes);
-
-    removeLoadingGif();
     
-    newElement.appendChild(createTableHTML(averageTimes));
 
     
 }

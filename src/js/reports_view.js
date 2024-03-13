@@ -22,8 +22,9 @@ var readPrefsFromStorageAndUpdate = (forceRefresh) => {
 }
 
 var updatePage = (preferences, forceRefresh) => {
-    console.log("Updatepage");
-    console.log(preferences);
+    //console.log("Updatepage");
+    //console.log(preferences);
+    cycletimetest(preferences[CYCLE_TIME_CHART], preferences[CYCLE_TIME_ITERATIONS]);
     /*
     if(preferences.add_days_in_progress === "true") {
         addDaysInProgress(forceRefresh);
