@@ -70,7 +70,7 @@ var handleMessage = (request, sender, sendResponse) => {
 chrome.runtime.onMessage.addListener(handleMessage);
 
 waitForElement(`.cycle-time-chart`).then((elm) => {
-    console.log("waited");
+    //console.log("waited");
     readPrefsFromStorageAndUpdate(false);
 });
 

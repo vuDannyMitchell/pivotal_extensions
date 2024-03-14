@@ -9,26 +9,6 @@ var insertBox = () => {
 
 }
 
-// Counts 24 hours a day, minus weekends
-var hoursBetweenDates = (earlier, later) => {
-    const MS_IN_HR = 3600000;
-
-    var earlierDate = new Date(earlier);
-    var laterDate = new Date(later);
-    var diff = laterDate - earlierDate;
-    var weekendDayCount = 0;
-
-    var counter = laterDate - (24*MS_IN_HR);
-    while(counter > earlierDate) {
-        let counterDate = new Date(counter);
-        if(counterDate.getDay() == 0 || counterDate.getDay() == 6) {
-            weekendDayCount++;
-        }
-        counter = counter - (24*MS_IN_HR);
-    }
-    return Math.ceil((diff - (weekendDayCount*24*MS_IN_HR))/MS_IN_HR);
-}
-
 var createContainerHTML = () => {
     var containerElement = document.createElement("div");
     containerElement.setAttribute("class", "cycle_time_by_point_container");
@@ -93,12 +73,31 @@ var createLoadingGifHTML = () => {
     var containerElement = document.createElement("img");
     containerElement.setAttribute("type", "pivotal_extensions_loading_gif");
     containerElement.setAttribute("class", "cycle_time_by_point_loading_gif");
-    var gifURL = browser.runtime.getURL("assets/loading.gif");
+    var gifURL = chrome.runtime.getURL("assets/loading.gif");
     containerElement.src = gifURL;
     //containerElement.insertAdjacentHTML('beforeend', `<img src="${gifURL}"></img>`);
     return containerElement;
 }
 
+// Counts 24 hours a day, minus weekends
+var hoursBetweenDates = (earlier, later) => {
+    const MS_IN_HR = 3600000;
+
+    var earlierDate = new Date(earlier);
+    var laterDate = new Date(later);
+    var diff = laterDate - earlierDate;
+    var weekendDayCount = 0;
+
+    var counter = laterDate - (24*MS_IN_HR);
+    while(counter > earlierDate) {
+        let counterDate = new Date(counter);
+        if(counterDate.getDay() == 0 || counterDate.getDay() == 6) {
+            weekendDayCount++;
+        }
+        counter = counter - (24*MS_IN_HR);
+    }
+    return Math.ceil((diff - (weekendDayCount*24*MS_IN_HR))/MS_IN_HR);
+}
 
 var determineTimeSpentInEachState = (history) => {
     var timeSpent = {};
@@ -172,8 +171,5 @@ var cycletimetest = async (displayChart, iterationsToAverage) => {
         removeLoadingGif();
         
         newElement.appendChild(createTableHTML(averageTimes, iterationsToAverage));
-    }
-    
-
-    
+    }   
 }
