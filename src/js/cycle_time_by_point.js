@@ -16,22 +16,53 @@ var createContainerHTML = () => {
     return containerElement;
 }
 
+var createPointColorBox = (estimate) => {
+    var color;
+    if(estimate === "0") {
+        color = "rgb(83, 189, 235)";
+    } else if (estimate === "1") {
+        color = "rgb(252, 161, 0)";
+    } else if (estimate === "2") {
+        color = "rgb(49, 189, 130)";
+    } else if (estimate === "3") {
+        color = "rgb(239, 225, 41)";
+    } else if (estimate === "5") {
+        color = "rgb(120, 118, 225)";
+    } else if (estimate === "8") {
+        color = "rgb(229, 96, 31)";
+    } else if (estimate === "13") {
+        color = "rgb(225, 124, 172)";
+    } else {
+        color = "rgb(0, 0, 0)";
+    }
+
+    return(`<span style="border-top: 10px solid ${color};display:inline-block;width:10px;margin-right:5px"></span>`)
+}
+
+var capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 var createTableHTML = (averageTimes, iterationsToAverage) => {
     //console.log("creating table");
     //console.log(iterationsToAverage)
     var containerElement = document.createElement("div");
     var headerElement = document.createElement("h2");
+    headerElement.setAttribute("class","chart_header");
     headerElement.innerHTML = `Average Time Spent over ${iterationsToAverage} iteration(s)`;
     containerElement.appendChild(headerElement);
     var tableElement = document.createElement("table");
+    tableElement.setAttribute("class","chart_table");
     var tableRowElement = document.createElement("tr");
     var columnElement = document.createElement("th");
     columnElement.innerHTML = `Estimate`;
+    columnElement.setAttribute("class","chart_column_header");
     tableRowElement.appendChild(columnElement);
     
     for(state in TRACKABLE_STATES) {
         columnElement = document.createElement("th");
-        columnElement.innerHTML = `${TRACKABLE_STATES[state]}`;
+        columnElement.setAttribute("class","chart_column_header");
+        columnElement.innerHTML = `${capitalizeFirstLetter(TRACKABLE_STATES[state])}`;
         tableRowElement.appendChild(columnElement);
     }
     tableElement.appendChild(tableRowElement);
@@ -39,7 +70,9 @@ var createTableHTML = (averageTimes, iterationsToAverage) => {
     for(let estimate in averageTimes) {
         tableRowElement = document.createElement("tr");
         columnElement = document.createElement("td");
-        columnElement.innerHTML = `${estimate} (${averageTimes[estimate].count})`;
+        columnElement.setAttribute("class","chart_column_element");
+        columnElement.innerHTML = createPointColorBox(estimate);
+        columnElement.innerHTML += `${estimate} (${averageTimes[estimate].count})`;
         tableRowElement.appendChild(columnElement);
         for(state in averageTimes[estimate]) {
             columnElement = document.createElement("td");
@@ -48,7 +81,6 @@ var createTableHTML = (averageTimes, iterationsToAverage) => {
         }
         tableElement.appendChild(tableRowElement);
     }
-
 
     containerElement.appendChild(tableElement);
 
@@ -128,7 +160,9 @@ var cycletimetest = async (displayChart, iterationsToAverage) => {
         var chartElement = document.querySelector(`.cycle-time-chart`);
         var newElement = createContainerHTML();
         newElement.appendChild(createLoadingGifHTML());
-        chartElement.parentNode.appendChild(newElement);
+        //chartElement.parentNode.appendChild(newElement);
+        newElement.setAttribute("class", "cycle_time_average");
+        chartElement.parentNode.parentNode.parentNode.appendChild(newElement);
 
         var iterations = await fetchPrecedingIterations(iterationsToAverage);
         //console.log(iterations);

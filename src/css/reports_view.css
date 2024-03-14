@@ -2,11 +2,30 @@
     width: 35px;
 }
 
-.pe_test {
-    height: 100px;
-    width: 100px;
-    background-color: red;
-    margin-left: 1000px;
-    margin-top: 75px;
+.cycle_time_average {
+    width: 400px;
+    background-color: lightblue;
+    margin-left: 760px;
+    margin-top: -470px;
     position: absolute;
+}
+
+.chart_header {
+    color: red;
+    padding: 5px;
+    margin-bottom: 5px;
+    font-size: medium;
+}
+
+.chart_table {
+    color: blue;
+}
+
+.chart_column_header {
+    color: green;
+    padding: 5px;
+}
+
+.chart_column_element {
+    color: yellow;
 }
