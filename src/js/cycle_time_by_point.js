@@ -1,14 +1,5 @@
 const TRACKABLE_STATES = ["started", "finished", "delivered", "accepted"];
 
-
-var insertBox = () => {
-    var containerElement = document.createElement("div");
-    containerElement.setAttribute("class", "pe_test");
-    var chartElement = document.querySelector(`.cycle-time-chart`);
-    chartElement.parentNode.parentNode.parentNode.appendChild(containerElement);
-
-}
-
 var createContainerHTML = () => {
     var containerElement = document.createElement("div");
     containerElement.setAttribute("class", "cycle_time_by_point_container");
@@ -44,40 +35,55 @@ var capitalizeFirstLetter = (string) => {
 }
 
 var createTableHTML = (averageTimes, iterationsToAverage) => {
-    //console.log("creating table");
-    //console.log(iterationsToAverage)
+    console.log("creating table");
+    console.log(averageTimes)
     var containerElement = document.createElement("div");
-    var headerElement = document.createElement("h2");
+    containerElement.setAttribute("class", "chart_container");
+    var headerElement = document.createElement("div");
     headerElement.setAttribute("class","chart_header");
     headerElement.innerHTML = `Average Time Spent over ${iterationsToAverage} iteration(s)`;
     containerElement.appendChild(headerElement);
-    var tableElement = document.createElement("table");
+    var tableElement = document.createElement("div");
     tableElement.setAttribute("class","chart_table");
-    var tableRowElement = document.createElement("tr");
-    var columnElement = document.createElement("th");
-    columnElement.innerHTML = `Estimate`;
-    columnElement.setAttribute("class","chart_column_header");
-    tableRowElement.appendChild(columnElement);
+    var tableRowElement = document.createElement("div");
+    tableRowElement.setAttribute("class","chart_row")
+    var cellElement = document.createElement("div");
+    cellElement.innerHTML = `Estimate (# of stories)`;
+    cellElement.setAttribute("class","chart_column_header");
+    tableRowElement.appendChild(cellElement);
+
+    cellElement = document.createElement("div");
+    cellElement.innerHTML = `Total Time`;
+    cellElement.setAttribute("class","chart_column_header");
+    tableRowElement.appendChild(cellElement);
     
     for(state in TRACKABLE_STATES) {
-        columnElement = document.createElement("th");
-        columnElement.setAttribute("class","chart_column_header");
-        columnElement.innerHTML = `${capitalizeFirstLetter(TRACKABLE_STATES[state])}`;
-        tableRowElement.appendChild(columnElement);
+        cellElement = document.createElement("div");
+        cellElement.setAttribute("class","chart_column_header");
+        cellElement.innerHTML = `${capitalizeFirstLetter(TRACKABLE_STATES[state])}`;
+        tableRowElement.appendChild(cellElement);
     }
     tableElement.appendChild(tableRowElement);
 
     for(let estimate in averageTimes) {
-        tableRowElement = document.createElement("tr");
-        columnElement = document.createElement("td");
-        columnElement.setAttribute("class","chart_column_element");
-        columnElement.innerHTML = createPointColorBox(estimate);
-        columnElement.innerHTML += `${estimate} (${averageTimes[estimate].count})`;
-        tableRowElement.appendChild(columnElement);
-        for(state in averageTimes[estimate]) {
-            columnElement = document.createElement("td");
-            columnElement.innerHTML = `${averageTimes[estimate][state]}`;
-            tableRowElement.appendChild(columnElement);
+        tableRowElement = document.createElement("div");
+        tableRowElement.setAttribute("class","chart_row");
+
+        cellElement = document.createElement("div");
+        cellElement.setAttribute("class","chart_cell");
+        cellElement.innerHTML = createPointColorBox(estimate);
+        cellElement.innerHTML += `${estimate} (${averageTimes[estimate].count})`;
+        tableRowElement.appendChild(cellElement);
+
+        cellElement = document.createElement("div");
+        cellElement.setAttribute("class","chart_cell");
+        cellElement.innerHTML = `${averageTimes[estimate].total}`;
+        tableRowElement.appendChild(cellElement);
+        for(state in TRACKABLE_STATES) {
+            cellElement = document.createElement("div");
+            cellElement.setAttribute("class","chart_cell");
+            cellElement.innerHTML = `${averageTimes[estimate][TRACKABLE_STATES[state]]}`;
+            tableRowElement.appendChild(cellElement);
         }
         tableElement.appendChild(tableRowElement);
     }
@@ -194,10 +200,12 @@ var cycletimetest = async (displayChart, iterationsToAverage) => {
         var averageTimes = {}
         for(estimate in storyStateData) {
             averageTimes[estimate] = {
-                count : storyStateData[estimate].count
+                count : storyStateData[estimate].count,
+                total : 0
             };
             for(state in TRACKABLE_STATES) {
                 averageTimes[estimate][TRACKABLE_STATES[state]] = Math.round(storyStateData[estimate].timeSpent[TRACKABLE_STATES[state]] / storyStateData[estimate].count);
+                averageTimes[estimate].total += averageTimes[estimate][TRACKABLE_STATES[state]];
             }
         }
         //console.log(averageTimes)
