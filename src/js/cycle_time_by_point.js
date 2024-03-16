@@ -119,6 +119,14 @@ var removeChart = () => {
     };
 }
 
+var chartExists = () => {
+    var chart = document.querySelector('[type="pivotal_extensions_cycle_time_by_point"]');
+    if(chart != undefined) {
+        return true;
+    };
+    return false;
+}
+
 var removeLoadingGif = () => {
     var old_element = document.querySelector('[type="pivotal_extensions_loading_gif"]');
     if(old_element != undefined) {

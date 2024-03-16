@@ -66,7 +66,7 @@ var readPrefsFromStorage = () => {
         if(!cycle_time_count) cycle_time_count = "true";
 
         var cycle_time_iterations = parseInt(result[CYCLE_TIME_ITERATIONS]);
-        if(!cycle_time_iterations) cycle_time_iterations = 4;
+        if(!cycle_time_iterations) cycle_time_iterations = 2;
 
         updateCheckbox("days_in_progress", add_days_in_progress);
         updateCheckbox("iteration_progress", iteration_progress);
@@ -91,7 +91,7 @@ var collectPreferences = () => {
     var add_iteration_progress_cb = document.getElementById("iteration_progress").checked.toString();
     var cycle_time_chart_cb = document.getElementById("cycle_time_chart").checked.toString();
     var cycle_time_iterations_input = parseInt(document.getElementById("cycle_time_iterations").value);
-    if(!cycle_time_iterations_input) cycle_time_iterations_input = 4;
+    if(!cycle_time_iterations_input) cycle_time_iterations_input = 2;
     return { 
         [ADD_DAYS_IN_PROGRESS] : add_days_in_progress_cb, 
         [ITERATION_PROGRESS] : add_iteration_progress_cb,

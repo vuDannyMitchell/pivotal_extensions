@@ -10,7 +10,7 @@ var readPrefsFromStorageAndUpdate = (forceRefresh) => {
         if(!cycle_time_chart) cycle_time_chart = "true";
 
         var cycle_time_iterations = parseInt(result[CYCLE_TIME_ITERATIONS]);
-        if(!cycle_time_iterations) cycle_time_iterations = 4;
+        if(!cycle_time_iterations) cycle_time_iterations = 2;
 
         var preferences = {
             [CYCLE_TIME_CHART] : cycle_time_chart, 
@@ -22,6 +22,8 @@ var readPrefsFromStorageAndUpdate = (forceRefresh) => {
 }
 
 var updatePage = (preferences, forceRefresh) => {
+    console.log("preferences")
+    console.log(preferences)
     if(preferences[CYCLE_TIME_CHART] === "true") {
         addCycleTimeChart(preferences[CYCLE_TIME_ITERATIONS]);
     } else {
@@ -34,6 +36,7 @@ var handleRefreshEvent = () => {
 }
 
 var handleForceRefreshEvent = () => {
+    console.log("force refresh")
     readPrefsFromStorageAndUpdate(true);
 }
 
@@ -55,11 +58,24 @@ var handleMessage = (request, sender, sendResponse) => {
     }
 }
 
+var isOnCycleTimeByPoint = () => {
+    var urlElements = window.location.href.split("/");
+    var isCycleTime = urlElements.findIndex((e) => e === "cycle_time") >= -1;
+    var isurlparam = getUrlParameter("display") === "estimate";
+    //console.log(`isCycleTime: ${isCycleTime}, isurlparam: ${isurlparam}`);
+    return isCycleTime && isurlparam;
+}
 
 chrome.runtime.onMessage.addListener(handleMessage);
 
 waitForElement(`.cycle-time-chart`).then((elm) => {
-    //console.log("waited");
-    readPrefsFromStorageAndUpdate(false);
+    if(isOnCycleTimeByPoint() && !chartExists()) {
+        readPrefsFromStorageAndUpdate(false);
+    }
 });
-
+  
+observeUrlChange(() => {
+    if(isOnCycleTimeByPoint() && !chartExists()) {
+        readPrefsFromStorageAndUpdate(false);
+    }
+});
