@@ -22,22 +22,11 @@ var readPrefsFromStorageAndUpdate = (forceRefresh) => {
 }
 
 var updatePage = (preferences, forceRefresh) => {
-    //console.log("Updatepage");
-    //console.log(preferences);
-    cycletimetest(preferences[CYCLE_TIME_CHART], preferences[CYCLE_TIME_ITERATIONS]);
-    /*
-    if(preferences.add_days_in_progress === "true") {
-        addDaysInProgress(forceRefresh);
+    if(preferences[CYCLE_TIME_CHART] === "true") {
+        addCycleTimeChart(preferences[CYCLE_TIME_ITERATIONS]);
     } else {
-        removeDaysInProgress();
+        removeChart();
     }
-
-    if(preferences.iteration_progress === "true") {
-        addIterationProgress(forceRefresh);
-    } else {
-        removeIterationProgress();
-    }
-    */
 }
 
 var handleRefreshEvent = () => {

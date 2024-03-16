@@ -119,5 +119,10 @@ document.addEventListener("click", (e) => {
         handlePreferencesChanged();
     }
 });
+document.addEventListener('keydown', function onEvent(e) {
+    if (e.target.id === "cycle_time_iterations" && e.key === "Enter") {
+        handlePreferencesChanged();
+    }
+});
 
 readPrefsFromStorage();
